@@ -5,7 +5,9 @@
  * @param key optional key to check for uniqueness
  */
 
-export function getUnique(arr: any[], key: string) {
+import { kStringI } from "./types";
+
+export function getUnique(arr: kStringI[], key: string) {
 	// this uses an object(map) to remove duplicates
 	const obj = arr.reduce((final, curr) => {
 		const k = curr[key]

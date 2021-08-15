@@ -13,3 +13,7 @@ export interface PokemonBaseI {
 	id: string;
 	type: string[]
 }
+
+export interface kStringI {
+	[key: string]: any;
+}
