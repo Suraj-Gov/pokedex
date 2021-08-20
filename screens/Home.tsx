@@ -1,26 +1,29 @@
-import React, { useCallback, useState } from "react";
+import React from "react";
 import { StatusBar } from "expo-status-bar";
-import {
-  ActivityIndicator,
-  Button,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "react-query";
 import axios from "axios";
 import { FlatList, TextInput } from "react-native-gesture-handler";
 import { PokemonBaseI } from "../types";
 import { getUnique } from "../utils";
-import PokemonTile from "../components/PokemonTile";
-import { debounce } from "debounce";
+import { HeartIcon } from "../assets/icons";
+import styles from "../styles/HomeStyles";
+import BigLoader from "../components/BigLoader";
+import sharedStyles from "../styles/SharedStyles";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../App";
+import PokemonsList from "../components/PokemonsList";
+import usePokemonSearch from "../hooks/usePokemonSearch";
+import { LIKED_COLOR, NOT_LIKED_COLOR } from "../constants";
 
-export default function Pokemon() {
-  const [limit, setLimit] = useState(50);
-  const [searchText, setSearchText] = useState("");
-  const [filteredPokemons, setFilteredPokemons] = useState<PokemonBaseI[]>([]);
+type NavigationT = NativeStackNavigationProp<RootStackParamList, "Home">;
+
+interface props {}
+
+const Home: React.FC<props> = ({}) => {
+  const navigation = useNavigation<NavigationT>();
 
   const allPokemons = useQuery("getAllPokemons", async () => {
     const { data } = await axios.get<PokemonBaseI[]>(
@@ -30,93 +33,57 @@ export default function Pokemon() {
     return uniquifiedData;
   });
 
-  const searchForPokemons = useCallback(
-    debounce((searchStr: string) => {
-      console.log("searching..");
-      if (searchStr.length > 3 && allPokemons.data) {
-        const filtered = allPokemons.data.filter((i) =>
-          i.name.toLowerCase().includes(searchStr)
-        );
-        console.log(filtered);
-        setFilteredPokemons(filtered);
-      } else {
-        setFilteredPokemons([]);
-      }
-    }, 500),
-    []
-  );
-
-  const searchPokemons = useCallback((value: string) => {
-    console.log(value);
-    setSearchText(value);
-    searchForPokemons(value);
-  }, []);
+  const { filteredPokemons, limit, searchPokemons, searchText, setLimit } =
+    usePokemonSearch({
+      basePokemonsArr: allPokemons.data,
+      initLimit: 50,
+    });
 
   return (
-    <SafeAreaView style={styles.centeredContainer}>
+    <SafeAreaView
+      style={[
+        sharedStyles.centeredContainer,
+        sharedStyles.parentView,
+        sharedStyles.fullHeightContainer,
+      ]}
+    >
       <StatusBar style="auto"></StatusBar>
-      <View>
+      <View style={sharedStyles.topSearchView}>
         <TextInput
           value={searchText}
           onChangeText={searchPokemons}
           placeholder="Search Pokemons"
-          style={styles.searchInput}
+          style={sharedStyles.searchInput}
         />
+        <TouchableOpacity style={{ marginLeft: 10 }}>
+          <HeartIcon fill={LIKED_COLOR} />
+        </TouchableOpacity>
       </View>
       <View style={styles.listContainer}>
         {allPokemons.isLoading ? (
-          <View style={styles.centeredContainer}>
-            <ActivityIndicator size="large"></ActivityIndicator>
-          </View>
+          <BigLoader />
         ) : (
           <>
-            <FlatList
-              numColumns={2}
-              style={styles.list}
+            <PokemonsList
               data={
-                filteredPokemons.length && searchText.length > 3
-                  ? filteredPokemons.slice(0, limit)
-                  : allPokemons.data?.slice(0, limit)
+                searchText.length > 3
+                  ? filteredPokemons
+                  : allPokemons?.data || []
               }
-              renderItem={(i) => <PokemonTile pokemonData={i.item} />}
-              keyExtractor={(data) => data.number}
-              onEndReached={() => setLimit((l) => l + 20)}
+              initLimit={limit}
+              onPressFn={(i) => {
+                const pokemonData: PokemonBaseI = i.item;
+                navigation.navigate("PokemonDetails", {
+                  slug: pokemonData.slug,
+                  imageUrl: pokemonData.ThumbnailImage,
+                });
+              }}
             />
           </>
         )}
       </View>
     </SafeAreaView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  centeredContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#ddd",
-  },
-  listContainer: {
-    alignItems: "center",
-    display: "flex",
-    height: "100%",
-    width: "100%",
-  },
-  list: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  buttonContainer: {
-    position: "absolute",
-    bottom: 30,
-  },
-  searchInput: {
-    width: 300,
-    height: 35,
-    padding: 8,
-    marginTop: 80,
-    marginBottom: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.801)",
-    borderRadius: 12,
-  },
-});
+export default Home;

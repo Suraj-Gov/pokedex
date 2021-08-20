@@ -1,39 +1,51 @@
+import { NavigationContainer, NavigationProp } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import { LogBox } from "react-native";
-import { createAppContainer } from "react-navigation";
-import { createStackNavigator } from "react-navigation-stack";
+import { LogBox, TouchableOpacity } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
-import Home from "./screens/Home"
+import { HeartIcon } from "./assets/icons";
+import Ability from "./screens/Ability";
+import Home from "./screens/Home";
 import PokemonDetails from "./screens/PokemonDetails";
 
-LogBox.ignoreLogs(["Setting a timer"])
+LogBox.ignoreLogs(["Setting a timer"]);
 
-const appNavigator = createStackNavigator(
-  {
-    Home: {
-      screen: Home
-    },
-    PokemonDetails: {
-      screen: PokemonDetails
-    }
-  }, {
-    initialRouteName: "Home",
-    headerMode: "none"
-  }
-)
+export type RootStackParamList = {
+  Home: undefined;
+  PokemonDetails: {
+    slug: string;
+    imageUrl: string;
+  };
+  Ability: {
+    name: string;
+    abilityUrl: string;
+  };
+};
 
-const AppContainer = createAppContainer(appNavigator)
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 interface props {}
 
-const App:React.FC<props> = () => {
-  
-  const queryClient = new QueryClient()
+const App: React.FC<props> = () => {
+  const queryClient = new QueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
-    <AppContainer /></QueryClientProvider>
-  )
-}
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{
+              title: "Pokedex",
+            }}
+          />
+          <Stack.Screen name="Ability" component={Ability} />
+          <Stack.Screen name="PokemonDetails" component={PokemonDetails} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
