@@ -21,6 +21,8 @@ import { abilityI, PokemonDetailsI, statI } from "../types";
 import WithLabel from "../components/WithLabel";
 import { FlatList } from "react-native-gesture-handler";
 import { HeartIcon } from "../assets/icons";
+import useIsPokemonFavorited from "../hooks/useIsPokemonFavorited";
+import useToggle from "../hooks/useToggle";
 
 type navigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -33,23 +35,20 @@ interface props {}
 const PokemonDetails: React.FC<props> = ({}) => {
   const route = useRoute<pageRouteProp>();
   const navigation = useNavigation<navigationProp>();
+  const [isFavorite, toggleFavorite] = useIsPokemonFavorited(route.params.slug);
 
   useEffect(() => {
     navigation.setOptions({
       title: route.params.slug,
       headerRight: () => {
         return (
-          <TouchableOpacity
-            onPress={() => {
-              // TODO
-            }}
-          >
-            <HeartIcon fill={true ? NOT_LIKED_COLOR : LIKED_COLOR} />
+          <TouchableOpacity onPress={toggleFavorite}>
+            <HeartIcon fill={isFavorite ? LIKED_COLOR : NOT_LIKED_COLOR} />
           </TouchableOpacity>
         );
       },
     });
-  }, []);
+  }, [isFavorite]);
 
   const pokemonDetails = useQuery([route.params.slug], async () => {
     const { data } = await axios.get<PokemonDetailsI>(

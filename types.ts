@@ -39,3 +39,7 @@ export interface PokemonDetailsI {
 export interface kStringI {
   [key: string]: any;
 }
+
+export interface favoritesI {
+  favoritePokemons: string[];
+}
