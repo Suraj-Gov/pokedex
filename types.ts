@@ -43,3 +43,7 @@ export interface kStringI {
 export interface favoritesI {
   favoritePokemons: string[];
 }
+
+export interface compareTupleI {
+  compareTuple: PokemonBaseI[];
+}

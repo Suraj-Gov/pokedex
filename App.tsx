@@ -1,13 +1,13 @@
-import { NavigationContainer, NavigationProp } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import { LogBox, TouchableOpacity } from "react-native";
+import { LogBox } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { HeartIcon } from "./assets/icons";
 import Ability from "./screens/Ability";
 import Favorites from "./screens/Favorites";
 import Home from "./screens/Home";
 import PokemonDetails from "./screens/PokemonDetails";
+import { PokemonBaseI } from "./types";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 
@@ -16,6 +16,7 @@ export type RootStackParamList = {
   PokemonDetails: {
     slug: string;
     imageUrl: string;
+    pokemonBaseData: PokemonBaseI;
   };
   Ability: {
     name: string;

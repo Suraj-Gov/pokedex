@@ -11,7 +11,7 @@ import { RootStackParamList } from "../App";
 import { HeartIcon } from "../assets/icons";
 import BigLoader from "../components/BigLoader";
 import PokemonsList from "../components/PokemonsList";
-import { getAllPokemons, LIKED_COLOR } from "../constants";
+import { GET_ALL_POKEMONS_ENDPOINT, LIKED_COLOR } from "../constants";
 import usePokemonSearch from "../hooks/usePokemonSearch";
 import sharedStyles from "../styles/SharedStyles";
 import { PokemonBaseI } from "../types";
@@ -36,7 +36,7 @@ const Ability: React.FC<props> = () => {
   const pokemonsWithAbility = useQuery<PokemonBaseI[]>(route.params.name, async () => {
 		const {data: pokemonsOfAbility} = await axios.get(route.params.abilityUrl);
 		const pokemonNames = pokemonsOfAbility.pokemon.map((i: any) => i.pokemon.name.toLowerCase())
-		const {data: pokemons} = await axios.get<PokemonBaseI[]>(getAllPokemons)
+		const {data: pokemons} = await axios.get<PokemonBaseI[]>(GET_ALL_POKEMONS_ENDPOINT)
 		const filteredPokemons = pokemons.filter(i => pokemonNames.includes(i.slug))
 		return getUnique(filteredPokemons, "slug");
 	})
@@ -89,6 +89,7 @@ const Ability: React.FC<props> = () => {
             navigation.navigate("PokemonDetails", {
               slug: pokemonData.slug,
               imageUrl: pokemonData.ThumbnailImage,
+              pokemonBaseData: pokemonData,
             });
           }}
         />

@@ -14,15 +14,22 @@ import { RootStackParamList } from "../App";
 import { useQuery } from "react-query";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import axios from "axios";
-import { LIKED_COLOR, NOT_LIKED_COLOR, pokemonBySlug } from "../constants";
+import {
+  LIKED_COLOR,
+  NOT_LIKED_COLOR,
+  GET_POKEMON_BY_SLUG_ENDPOINT,
+  COMPARE_COLOR,
+  NOT_COMPARE_COLOR,
+} from "../constants";
 import BigLoader from "../components/BigLoader";
 import sharedStyles from "../styles/SharedStyles";
 import { abilityI, PokemonDetailsI, statI } from "../types";
 import WithLabel from "../components/WithLabel";
 import { FlatList } from "react-native-gesture-handler";
-import { HeartIcon } from "../assets/icons";
+import { HeartIcon, VersusIcon } from "../assets/icons";
 import useIsPokemonFavorited from "../hooks/useIsPokemonFavorited";
 import useToggle from "../hooks/useToggle";
+import useIsPokemonCompare from "../hooks/useIsPokemonCompare";
 
 type navigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -36,23 +43,33 @@ const PokemonDetails: React.FC<props> = ({}) => {
   const route = useRoute<pageRouteProp>();
   const navigation = useNavigation<navigationProp>();
   const [isFavorite, toggleFavorite] = useIsPokemonFavorited(route.params.slug);
+  const [isInCompare, toggleCompare] = useIsPokemonCompare(
+    route.params.pokemonBaseData
+  );
 
   useEffect(() => {
     navigation.setOptions({
       title: route.params.slug,
       headerRight: () => {
         return (
-          <TouchableOpacity onPress={toggleFavorite}>
-            <HeartIcon fill={isFavorite ? LIKED_COLOR : NOT_LIKED_COLOR} />
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity onPress={toggleFavorite}>
+              <HeartIcon fill={isFavorite ? LIKED_COLOR : NOT_LIKED_COLOR} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleCompare}>
+              <VersusIcon
+                fill={isInCompare ? COMPARE_COLOR : NOT_COMPARE_COLOR}
+              />
+            </TouchableOpacity>
+          </>
         );
       },
     });
-  }, [isFavorite]);
+  }, [isFavorite, isInCompare]);
 
   const pokemonDetails = useQuery([route.params.slug], async () => {
     const { data } = await axios.get<PokemonDetailsI>(
-      pokemonBySlug + route.params.slug
+      GET_POKEMON_BY_SLUG_ENDPOINT + route.params.slug
     );
     return data;
   });

@@ -3,7 +3,11 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, TextInput, TouchableOpacity, View } from "react-native";
 import BigLoader from "../components/BigLoader";
 import PokemonsList from "../components/PokemonsList";
-import { FAVORITES_KEY, getAllPokemons, LIKED_COLOR } from "../constants";
+import {
+  FAVORITES_KEY,
+  GET_ALL_POKEMONS_ENDPOINT,
+  LIKED_COLOR,
+} from "../constants";
 import styles from "../styles/HomeStyles";
 import sharedStyles from "../styles/SharedStyles";
 import { favoritesI, PokemonBaseI } from "../types";
@@ -47,7 +51,9 @@ const Favorites: React.FC<props> = () => {
   const allFavoritedPokemons = useQuery(
     ["getAllPokemons", parsedStoreData],
     async () => {
-      const { data } = await axios.get<PokemonBaseI[]>(getAllPokemons);
+      const { data } = await axios.get<PokemonBaseI[]>(
+        GET_ALL_POKEMONS_ENDPOINT
+      );
       const filteredPokemons = data.filter((i) =>
         parsedStoreData.favoritePokemons.includes(i.slug)
       );

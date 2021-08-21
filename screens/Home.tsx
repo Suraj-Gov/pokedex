@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "react-query";
 import axios from "axios";
 import { FlatList, TextInput } from "react-native-gesture-handler";
-import { PokemonBaseI } from "../types";
+import { compareTupleI, PokemonBaseI } from "../types";
 import { getUnique } from "../utils";
 import { HeartIcon } from "../assets/icons";
 import styles from "../styles/HomeStyles";
@@ -16,7 +16,13 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../App";
 import PokemonsList from "../components/PokemonsList";
 import usePokemonSearch from "../hooks/usePokemonSearch";
-import { LIKED_COLOR, NOT_LIKED_COLOR } from "../constants";
+import {
+  COMPARE_TUPLE_KEY,
+  LIKED_COLOR,
+  MAX_COMPARE_TUPLES,
+} from "../constants";
+import useStoreData from "../hooks/useStoreData";
+import PokemonTile from "../components/PokemonTile";
 
 type NavigationT = NativeStackNavigationProp<RootStackParamList, "Home">;
 
@@ -39,6 +45,11 @@ const Home: React.FC<props> = ({}) => {
       initLimit: 50,
     });
 
+  const [compareTuple, setCompareTuple] =
+    useStoreData<compareTupleI>(COMPARE_TUPLE_KEY);
+
+  console.log({ compareTuple });
+
   return (
     <SafeAreaView
       style={[
@@ -48,43 +59,77 @@ const Home: React.FC<props> = ({}) => {
       ]}
     >
       <StatusBar style="auto"></StatusBar>
-      <View style={sharedStyles.topSearchView}>
-        <TextInput
-          value={searchText}
-          onChangeText={searchPokemons}
-          placeholder="Search Pokemons"
-          style={sharedStyles.searchInput}
-        />
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Favorites")}
-          style={{ marginLeft: 10 }}
-        >
-          <HeartIcon fill={LIKED_COLOR} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.listContainer}>
-        {allPokemons.isLoading ? (
-          <BigLoader />
-        ) : (
-          <>
-            <PokemonsList
-              data={
-                searchText.length > 3
-                  ? filteredPokemons
-                  : allPokemons?.data || []
-              }
-              initLimit={limit}
-              onPressFn={(i) => {
-                const pokemonData: PokemonBaseI = i.item;
-                navigation.navigate("PokemonDetails", {
-                  slug: pokemonData.slug,
-                  imageUrl: pokemonData.ThumbnailImage,
-                });
-              }}
+
+      {allPokemons.isLoading ? (
+        <BigLoader />
+      ) : (
+        <View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              marginVertical: 20,
+            }}
+          >
+            {!compareTuple ||
+            compareTuple.compareTuple.length < MAX_COMPARE_TUPLES ? (
+              <Text>Select any two Pokemons to compare</Text>
+            ) : (
+              compareTuple.compareTuple.map((pokemon, idx, arr) => (
+                <View
+                  style={{ marginRight: idx === 0 && arr.length >= 2 ? 15 : 0 }}
+                >
+                  <PokemonTile
+                    pokemonData={pokemon}
+                    key={idx}
+                    onPressFn={() => {
+                      navigation.navigate("PokemonDetails", {
+                        imageUrl: pokemon.ThumbnailImage,
+                        slug: pokemon.slug,
+                        pokemonBaseData: pokemon,
+                      });
+                    }}
+                  />
+                </View>
+              ))
+            )}
+          </View>
+          <View style={sharedStyles.topSearchView}>
+            <TextInput
+              value={searchText}
+              onChangeText={searchPokemons}
+              placeholder="Search Pokemons"
+              style={sharedStyles.searchInput}
             />
-          </>
-        )}
-      </View>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Favorites")}
+              style={{ marginLeft: 10 }}
+            >
+              <HeartIcon fill={LIKED_COLOR} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.listContainer}>
+            <>
+              <PokemonsList
+                data={
+                  searchText.length > 3
+                    ? filteredPokemons
+                    : allPokemons?.data || []
+                }
+                initLimit={limit}
+                onPressFn={(i) => {
+                  const pokemonData: PokemonBaseI = i.item;
+                  navigation.navigate("PokemonDetails", {
+                    slug: pokemonData.slug,
+                    imageUrl: pokemonData.ThumbnailImage,
+                    pokemonBaseData: pokemonData,
+                  });
+                }}
+              />
+            </>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
