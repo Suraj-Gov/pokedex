@@ -37,7 +37,6 @@ export default function usePokemonSearch(opts: optsI) {
   return {
     filteredPokemons,
     limit,
-    setLimit,
     searchPokemons,
     searchText,
   };

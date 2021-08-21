@@ -33,7 +33,7 @@ const Home: React.FC<props> = ({}) => {
     return uniquifiedData;
   });
 
-  const { filteredPokemons, limit, searchPokemons, searchText, setLimit } =
+  const { filteredPokemons, limit, searchPokemons, searchText } =
     usePokemonSearch({
       basePokemonsArr: allPokemons.data,
       initLimit: 50,
@@ -55,7 +55,10 @@ const Home: React.FC<props> = ({}) => {
           placeholder="Search Pokemons"
           style={sharedStyles.searchInput}
         />
-        <TouchableOpacity style={{ marginLeft: 10 }}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Favorites")}
+          style={{ marginLeft: 10 }}
+        >
           <HeartIcon fill={LIKED_COLOR} />
         </TouchableOpacity>
       </View>

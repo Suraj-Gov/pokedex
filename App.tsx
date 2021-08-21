@@ -5,6 +5,7 @@ import { LogBox, TouchableOpacity } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { HeartIcon } from "./assets/icons";
 import Ability from "./screens/Ability";
+import Favorites from "./screens/Favorites";
 import Home from "./screens/Home";
 import PokemonDetails from "./screens/PokemonDetails";
 
@@ -20,6 +21,7 @@ export type RootStackParamList = {
     name: string;
     abilityUrl: string;
   };
+  Favorites: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,6 +42,7 @@ const App: React.FC<props> = () => {
               title: "Pokedex",
             }}
           />
+          <Stack.Screen name="Favorites" component={Favorites} />
           <Stack.Screen name="Ability" component={Ability} />
           <Stack.Screen name="PokemonDetails" component={PokemonDetails} />
         </Stack.Navigator>

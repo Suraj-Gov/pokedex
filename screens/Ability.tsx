@@ -41,7 +41,7 @@ const Ability: React.FC<props> = () => {
 		return getUnique(filteredPokemons, "slug");
 	})
 
-  const { filteredPokemons, limit, searchPokemons, searchText, setLimit } =
+  const { filteredPokemons, limit, searchPokemons, searchText } =
     usePokemonSearch({
       initLimit: 50,
       basePokemonsArr: pokemonsWithAbility.data,
@@ -59,7 +59,10 @@ const Ability: React.FC<props> = () => {
           placeholder={`Search all ${route.params.name} Pokemons`}
           style={sharedStyles.searchInput}
         />
-        <TouchableOpacity style={{ marginLeft: 10 }}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Favorites")}
+          style={{ marginLeft: 10 }}
+        >
           <HeartIcon fill={LIKED_COLOR} />
         </TouchableOpacity>
       </View>
